@@ -54,16 +54,19 @@ pipeline {
 	   }
 	   
 	stage('RunDASTUsingZAP') {
-    agent {
-        docker { image 'owasp/zap2docker-stable' }
-    }
-    steps {
-        withKubeConfig([credentialsId: 'kubelogin']) {
-            sh('zap.sh -cmd -quickurl http://$(kubectl get services/rtbuggy --namespace=devsecops -o json | jq -r ".status.loadBalancer.ingress[] | .hostname") -quickprogress -quickout ${WORKSPACE}/zap_report.html')
-            archiveArtifacts artifacts: 'zap_report.html'
+            agent {
+                docker { image 'zaproxy/zap-stable' }
+            }
+            steps {
+                withKubeConfig([credentialsId: 'kubelogin']) {
+                    script {
+                        def ZAP_TARGET = sh(script: "kubectl get services/rtbuggy --namespace=devsecops -o json | jq -r '.status.loadBalancer.ingress[] | .hostname'", returnStdout: true).trim()
+                        sh "zap.sh -cmd -quickurl http://${ZAP_TARGET} -quickprogress -quickout ${WORKSPACE}/zap_report.html"
+                    }
+                    archiveArtifacts artifacts: 'zap_report.html'
+                }
+            }
         }
-    }
-}
 
 	   
   }
