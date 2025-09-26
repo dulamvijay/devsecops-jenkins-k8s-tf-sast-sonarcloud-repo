@@ -1,16 +1,3 @@
-	stage('Build') { 
-            steps { 
-               withDockerRegistry([credentialsId: "dockerlogin", url: ""]) {
-                 script{
-                 app =  docker.build("asg")
-                 }
-               }
-            }
-    }
-
-	
-		
-		
 pipeline {
   agent any
   tools { 
