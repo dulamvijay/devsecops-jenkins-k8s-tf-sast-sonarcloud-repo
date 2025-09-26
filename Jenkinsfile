@@ -1,3 +1,16 @@
+	stage('Build') { 
+            steps { 
+               withDockerRegistry([credentialsId: "dockerlogin", url: ""]) {
+                 script{
+                 app =  docker.build("asg")
+                 }
+               }
+            }
+    }
+
+	
+		
+		
 pipeline {
   agent any
   tools { 
@@ -16,6 +29,26 @@ pipeline {
 					sh 'mvn snyk:test -fn'
 				}
 			}
-    }		
+    }
+
+	stage('Build') { 
+            steps { 
+               withDockerRegistry([credentialsId: "dockerlogin", url: ""]) {
+                 script{
+                 app =  docker.build("rt")
+                 }
+               }
+            }
+    }
+	
+	stage('Push') {
+            steps {
+                script{
+                    docker.withRegistry('https://615299732666.dkr.ecr.us-west-2.amazonaws.com', 'ecr:us-west-2:aws-credentials') {
+                    app.push("latest")
+                    }
+                }
+            }
+    	}
   }
 }
