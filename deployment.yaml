@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtbuggy-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtbuggy
+  template:
+    metadata:
+      labels:
+        app: rtbuggy
+    spec:
+      containers:
+      - name: rtbuggy
+        image: 615299732666.dkr.ecr.us-west-2.amazonaws.com/rt
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+# service type loadbalancer       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rtbuggy
+    k8s-app: rtbuggy
+  name: rtbuggy
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  type: LoadBalancer
+  selector:
+    app: rtbuggy
